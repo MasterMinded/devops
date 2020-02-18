@@ -17,10 +17,10 @@ student_db = TinyDB(db_file_path)
 
 def add_student(student):
     if not student.first_name:
-        return 'unspecified first name', 405
+        return 'specify first name', 405
 
     if not student.last_name:
-        return 'unspecified last name', 405
+        return 'specify last name', 405
 
     queries = []
     query = Query()
@@ -29,41 +29,33 @@ def add_student(student):
     query = reduce(lambda a, b: a & b, queries)
     res = student_db.search(query)
     if res:
-        print("POST: alreadt exists")
-        return 'already exists', 409
+        return 'student already in db', 409
 
     doc_id = student_db.insert(student.to_dict())
     student.student_id = doc_id
-    print("POST: last return statement.")
     return student.student_id
 
 
 def get_student_by_id(student_id, subject):
     student = student_db.get(doc_id=int(student_id))
     if not student:
-        print("GET: student is None")
         return student
 
-    studentDict = student
+    currentStudent = student
     student = Student.from_dict(student)
     if not subject:
-        print("GET: subject is None")
         return student
 
-    if subject not in studentDict["grades"]:
-        print("GET: subject not in student dictionary")
-        return 'wrong subject', 404
+    if subject not in currentStudent["grades"]:
+        return 'subject not found in dictionary', 404
 
-    print("GET: last return statement")
     return student
 
 
 def delete_student(student_id):
     student = student_db.get(doc_id=int(student_id))
     if not student:
-        print("DELETE: student is None")
-        return 'not existing user', 404
+        return 'user not found', 404
 
     student_db.remove(doc_ids=[int(student_id)])
-    print("DELETE: last return statement")
     return student_id
